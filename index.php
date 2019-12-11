@@ -103,49 +103,23 @@
         </div>
 
         <div class="form-group">
-          <label>Año</label><br />
-          <select id="año1" name="añoselect" placeholder="Selecciona Columnas" multiple>
-    				<option value=2011>2011</option>
-    				<option value=2012>2012</option>
-    				<option value=2013>2013</option>
-    				<option value=2014>2014</option>
-    				<option value=2015>2015</option>
-    				<option value=2016>2016</option>
-    				<option value=2017>2017</option>
-    				<option value=2018>2018</option>
-    				<option value=2019>2019</option>
-          </select>
+          <label>Filas</label><br />
+          <select id="año1" name="añoselect" placeholder="Selecciona Columnas" multiple></select>
         </div>
-        <div class="form-group">
-          <label>Año</label><br />
-          <select id="año2" name="añoselect" placeholder="Selecciona Columnas" multiple>
-    				<option value=2011>2011</option>
-    				<option value=2012>2012</option>
-    				<option value=2013>2013</option>
-    				<option value=2014>2014</option>
-    				<option value=2015>2015</option>
-    				<option value=2016>2016</option>
-    				<option value=2017>2017</option>
-    				<option value=2018>2018</option>
-    				<option value=2019>2019</option>
-          </select>
-        </div>
-        <!-- <div class="form-group">
-          <label>Año</label><br />
-          <select id="cols" name="cols" multiple>
-            <option value=Delito>2010</option>
-    				<option value=Departamento>2011</option>
-    				<option value=Municipio>2012</option>
-    				<option value=Barrio>2013</option>
-    				<option value=Zona>2014</option>
-    				<option value=CodigoDane>2015</option>
-    				<option value=2016>2016</option>
-    				<option value=2017>2017</option>
-    				<option value=2018>2018</option>
-    				<option value=2019>2019</option>
-          </select>
-        </div> -->
 
+        <div class="form-group">
+          <label>Valores</label><br />
+          <select id="año2" name="añoselect" placeholder="Selecciona Columnas" multiple></select>
+        </div>
+
+        <div class="form-group">
+          <label>Operación</label><br />
+          <select id="año2" name="añoselect" placeholder="Selecciona Columnas">
+            <option value=COUNT>Contar</option>
+    				<option value=2011>2011</option>          
+          </select>
+        </div>
+        
         <div class="form-group">
           <input type="submit" class="btn btn-info" name="buscar" value="Buscar" />
         </div>
@@ -175,7 +149,8 @@
               if(isset($_POST['delito'])){
                 foreach($_POST['delito'] as $key=>$value){$delitos .= "'".$value."',";}
                 $delitos = " delito in (".substr($delitos,0,-1).") ";
-                echo 'delito';
+                //echo str_replace('"',"'",json_encode($_POST['delito']));
+                
               }
               if(isset($_POST['departamento'])){
                 foreach($_POST['departamento'] as $value){$departamentos .= "CodigoDANE like '".$value."%' or ";}
@@ -232,6 +207,15 @@
 
 <script>
   $(document).ready(function(){
+
+    function arrayDiff(array1,array2) {
+      var newItems = [];
+      jQuery.grep(array2, function(i) {
+        if (jQuery.inArray(i, array1) == -1){newItems.push(i);}
+      });
+      return newItems;
+    }
+
     //$('#multiselect_form div select').multiselect({
     $('#año,#departamento,#delito').multiselect({
       nonSelectedText: 'Select value',
@@ -242,11 +226,80 @@
       allSelectedText: 'Todos',
       buttonWidth:'400px'
     });
+    var campos = [  
+      {name: 'Delito', disable: false},
+      {name: 'Departamento', disable: false},
+      {name: 'Municipio', disable: false},
+      {name: 'Barrio', disable: false},
+      {name: 'Zona', disable: false},
+      {name: 'CodigoDane', disable: false}
+    ];
+    var nCampos =['Delito','Departamento','Municipio','Barrio','Zona','CodigoDane'];
 
-    ///selectize
-    // $('#año1, #año2').selectize({
-    //   plugins: ['remove_button']
-    // })
+    //selectize
+    var $sel=$('#año1, #año2').selectize({
+      options:campos,
+      valueField: 'name',
+      labelField: 'name',
+      searchField: ['name'],
+      disabledField: 'disable',
+      //plugins: ['drag_drop'],
+      //persist: false
+      
+      });
+      $("#año1 option").on("remove", function(){
+        var val = $sel[0].selectize.getValue();
+        $sel[1].selectize.updateOption(val,{name:val,disable:false});
+        console.log(v);
+      })
+      // onChange: function() {
+      //   var val = $sel[0].selectize.getValue();
+      //   //$sel[1].selectize.updateOption(val[0],{name:val[0],disable:false})
+      //   $sel[1].selectize.updateOption(val[0],{name:val[0],disable:true})
+      //   $sel[1].selectize.clear();
+      //   $sel[1].selectize.renderCache = {};
+      //   $sel[1].selectize.refreshOptions();
+      //   console.log(val)
+      // }
+ 
+
+    $("#año1").change(function() {
+      var val = $sel[0].selectize.getValue();
+      //$sel[1].selectize.clear();
+      var diff = arrayDiff(val,nameOptions);
+
+      $.each(diff,function(i,v){
+        $sel[1].selectize.updateOption(v,{name:v,disable:false})
+      });
+      $.each(val,function(i,v){
+        $sel[1].selectize.updateOption(v,{name:v,disable:true})
+        
+      });
+      $sel[1].selectize.updateOption(val[0],{name:val[0],disable:true})
+      //   $sel[1].selectize.updateOption(val[0],{name:val[0],disable:true})
+      //   $sel[1].selectize.renderCache = {};
+      //   $sel[1].selectize.refreshOptions();
+      console.log(val)
+      console.log(diff)
+    })
+    $("#año2").change(function() {
+      var val = $sel[1].selectize.getValue();
+      //$sel[0].selectize.clear();
+      var diff = arrayDiff(val,nameOptions);
+
+      $.each(diff,function(i,v){
+        $sel[0].selectize.updateOption(v,{name:v,disable:false})
+      });
+      $.each(val,function(i,v){
+        $sel[0].selectize.updateOption(v,{name:v,disable:true})
+        
+      });
+      $sel[0].selectize.updateOption(val[1],{name:val[1],disable:true})
+    })
+
+
+
+
 
     //$('#multiselect_form div select').multiselect('selectAll', false);
 
@@ -256,24 +309,35 @@
 
     /////////////// HIDE SELECT ELEMENTS ////////////////
     //$("#año2").children('option:gt(0)').show();
-    $('#año2').children('option:gt(0)').prop("disabled", false);
-    $("#año1").change(function() {
-        //$("#año2").children('option').show();
-        $("#año2").children('option').prop("disabled", false);
+    // $('#año2').children('option:gt(0)').prop("disabled", false);
+    // $("#año1").change(function() {
+    //     $("#año2").children('option:selected').prop("disabled", false);
+    //     $("#año2").children('option').show();
+      
+    //     //var hid = $(this).val();
+    //     var hid = $sel[0].selectize.getValue();
+    //     var h ="";
         
-        var hid = $(this).val();
-        var h ="";
+    //     $.each(hid,function(index,value){
+    //     	h=h.concat("option[data-value=" + value + "],");
+    //     })
+    //     h = h.slice(0,-1);
+    //     console.log(h);
+    //     $("#layout_select").children(h).hide()
+    //     $("#año2").children(h).prop('selected',false);
+    //     $("#año2").children(h).prop('disabled',true);
+    //     $("#año2").children(h).hide();
+    //     $("#año2").children(h).prop("selectable",false);
+
+        // $sel[1].selectize.clear();
+        // $sel[1].selectize.renderCache = {};
+        // $sel[1].selectize.refreshItems();
         
-        $.each(hid,function(index,value){
-        	h=h.concat("option[value=" + value + "],");
-        })
-        h = h.slice(0,-1);
-        //$("#layout_select").children("option[value=" + $(this).val() + "]").hide()
-        //$("#año2").children(h).hide();
-        $("#año2").children(h).prop("disabled",true);
 
        // alert("w");
-    })
+    //})
+
+
 
     //   var form_data1= $('#año').val();
     //   var año_form_data = $('#año').serialize();
