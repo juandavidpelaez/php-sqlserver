@@ -114,9 +114,9 @@
 
         <div class="form-group">
           <label>Operación</label><br />
-          <select id="año2" name="añoselect" placeholder="Selecciona Columnas">
-            <option value=COUNT>Contar</option>
-    				<option value=2011>2011</option>          
+          <select id="año3" name="añoselect" placeholder="Selecciona Columnas">
+            <!-- <option value=COUNT>Contar</option>
+    				<option value=2011>2011</option>           -->
           </select>
         </div>
         
@@ -207,7 +207,6 @@
 
 <script>
   $(document).ready(function(){
-
     function arrayDiff(array1,array2) {
       var newItems = [];
       jQuery.grep(array2, function(i) {
@@ -237,7 +236,7 @@
     var nCampos =['Delito','Departamento','Municipio','Barrio','Zona','CodigoDane'];
 
     //selectize
-    var $sel=$('#año1, #año2').selectize({
+    var $sel=$('#año1, #año2, #año3').selectize({
       options:campos,
       valueField: 'name',
       labelField: 'name',
@@ -247,11 +246,11 @@
       //persist: false
       
       });
-      $("#año1 option").on("remove", function(){
-        var val = $sel[0].selectize.getValue();
-        $sel[1].selectize.updateOption(val,{name:val,disable:false});
-        console.log(v);
-      })
+      // $("#año1 option").on("remove", function(){
+      //   var val = $sel[0].selectize.getValue();
+      //   $sel[1].selectize.updateOption(val,{name:val,disable:false});
+      //   console.log($('.selectized').length);
+      // })
       // onChange: function() {
       //   var val = $sel[0].selectize.getValue();
       //   //$sel[1].selectize.updateOption(val[0],{name:val[0],disable:false})
@@ -265,38 +264,38 @@
 
     $("#año1").change(function() {
       var val = $sel[0].selectize.getValue();
+      var last = val.length -1;
+      var id = "#año1"
+      var listItem = document.getElementById(id.substring(1,id.length));
+      var index = [$("div select").index(listItem)-$("select:not(.selectized)").length]
+      var nS = new Array();
+      for (var i = 0; i <$("select.selectized").length; i++){nS.push(i);}
+      var dSels = arrayDiff(index,nS)
       //$sel[1].selectize.clear();
-      var diff = arrayDiff(val,nameOptions);
-
+      var diff = arrayDiff(val,nCampos);
       $.each(diff,function(i,v){
         $sel[1].selectize.updateOption(v,{name:v,disable:false})
       });
-      $.each(val,function(i,v){
-        $sel[1].selectize.updateOption(v,{name:v,disable:true})
-        
-      });
-      $sel[1].selectize.updateOption(val[0],{name:val[0],disable:true})
-      //   $sel[1].selectize.updateOption(val[0],{name:val[0],disable:true})
-      //   $sel[1].selectize.renderCache = {};
-      //   $sel[1].selectize.refreshOptions();
-      console.log(val)
-      console.log(diff)
+      $sel[1].selectize.updateOption(val[last],{name:val[last],disable:true})
+
+      console.log(dSels);
     })
     $("#año2").change(function() {
       var val = $sel[1].selectize.getValue();
       //$sel[0].selectize.clear();
-      var diff = arrayDiff(val,nameOptions);
-
+      var diff = arrayDiff(val,nCampos);
       $.each(diff,function(i,v){
         $sel[0].selectize.updateOption(v,{name:v,disable:false})
       });
       $.each(val,function(i,v){
-        $sel[0].selectize.updateOption(v,{name:v,disable:true})
-        
+        $sel[0].selectize.updateOption(v,{name:v,disable:true})    
       });
       $sel[0].selectize.updateOption(val[1],{name:val[1],disable:true})
-    })
+      })
 
+      // function disableC (selector) {
+
+      // }
 
 
 
