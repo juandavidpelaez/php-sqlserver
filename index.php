@@ -104,17 +104,17 @@
 
         <div class="form-group">
           <label>Filas</label><br />
-          <select id="año1" name="añoselect" placeholder="Selecciona Columnas" multiple></select>
+          <select id="año1" class="pivot" name="añoselect" placeholder="Selecciona Columnas" multiple></select>
         </div>
 
         <div class="form-group">
           <label>Valores</label><br />
-          <select id="año2" name="añoselect" placeholder="Selecciona Columnas" multiple></select>
+          <select id="año2" class="pivot" name="añoselect" placeholder="Selecciona Columnas" multiple></select>
         </div>
 
         <div class="form-group">
           <label>Operación</label><br />
-          <select id="año3" name="añoselect" placeholder="Selecciona Columnas">
+          <select id="año3" class="pivot" name="añoselect" placeholder="Selecciona Columnas">
             <!-- <option value=COUNT>Contar</option>
     				<option value=2011>2011</option>           -->
           </select>
@@ -236,7 +236,7 @@
     var nCampos =['Delito','Departamento','Municipio','Barrio','Zona','CodigoDane'];
 
     //selectize
-    var $sel=$('#año1, #año2, #año3').selectize({
+    var $sel=$('.pivot').selectize({
       options:campos,
       valueField: 'name',
       labelField: 'name',
@@ -261,25 +261,27 @@
       //   console.log(val)
       // }
  
-
-    $("#año1").change(function() {
-      var val = $sel[0].selectize.getValue();
-      var last = val.length -1;
-      var id = "#año1"
-      var listItem = document.getElementById(id.substring(1,id.length));
-      var index = [$("div select").index(listItem)-$("select:not(.selectized)").length]
-      var nS = new Array();
-      for (var i = 0; i <$("select.selectized").length; i++){nS.push(i);}
-      var dSels = arrayDiff(index,nS)
-      //$sel[1].selectize.clear();
-      var diff = arrayDiff(val,nCampos);
-      $.each(diff,function(i,v){
-        $sel[1].selectize.updateOption(v,{name:v,disable:false})
+    function disableCascadeSelectize(id,clase){     
+      // var id = "#año1";
+      // var clase = ".pivot"
+      $(id).change(function() {
+        var selectItem = document.getElementById(id.substring(1,id.length));
+        var selectizeIndex = $("div select").index(selectItem)-$("select:not("+clase+")").length;
+        var selectizeValue = $sel[selectizeIndex].selectize.getValue();
+        var last = selectizeValue.length -1;
+        var nSelectize = new Array();
+        for (var i = 0; i <$("select"+clase).length; i++){nSelectize.push(i);}
+        var OtherSelectizeIndex = arrayDiff([selectizeIndex],nSelectize);
+        var enableOptions = arrayDiff(selectizeValue,nCampos);
+        $.each(OtherSelectizeIndex,function(i,e){
+          $.each(enableOptions,function(j,v){
+            $sel[e].selectize.updateOption(v,{name:v,disable:false});
+          });
+          $sel[e].selectize.updateOption(selectizeValue[last],{name:selectizeValue[last],disable:true});
+        });
+        console.log($sel[0].valueFid)
       });
-      $sel[1].selectize.updateOption(val[last],{name:val[last],disable:true})
-
-      console.log(dSels);
-    })
+    }   
     $("#año2").change(function() {
       var val = $sel[1].selectize.getValue();
       //$sel[0].selectize.clear();
@@ -296,7 +298,9 @@
       // function disableC (selector) {
 
       // }
-
+      disableCascadeSelectize("#año1",".pivot");
+      disableCascadeSelectize("#año2",".pivot");
+      //disableCascadeSelectize("#año3",".pivot");
 
 
 
